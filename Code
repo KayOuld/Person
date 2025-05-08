@@ -1,0 +1,116 @@
+import java.util.Properties;
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+
+public abstract class Person {
+    private String name;
+    private String pass;
+
+    public Person(String nam, String pas) {
+        this.name = nam;
+        this.pass = pas;
+    }
+
+    public void store() {
+        Properties p = new Properties();
+        try (FileWriter writer = new FileWriter("myfile.properties")) {
+            p.setProperty(name, pass); 
+            p.store(writer, "User credentials");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean isValid(String user, String pin) {
+        Properties p = new Properties();
+        try (FileReader reader = new FileReader("myfile.properties")) {
+            p.load(reader);
+            return pin.equals(p.getProperty(user));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+}
+
+
+class Member extends Person {
+    public Member(String nam, String pas) {
+        super(nam, pas);
+    }
+}
+
+class Librarian extends Person {
+    public Librarian() {
+        super("Kay", "12345");
+        store();
+    }
+    public void librarian(String user, String pin) {
+        Properties p = new Properties();
+        try (FileReader reader = new FileReader("myfile.properties")) {
+            p.load(reader);
+            if (isValid(user, pin)) {
+                System.out.println("You are a librarian");
+            } else {
+                System.out.println("You are not a librarian");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("You are not a librarian");
+        }
+    }
+}
+
+
+
+class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        for (int i = 0; i > -1; i++) {
+            System.out.println("Enter 1 for Librarian, 2 for Member, 3 to exit");
+            int choice = scanner.nextInt();
+            if (choice == 3) {
+                break;
+            } else if (choice == 1) {
+                System.out.println("Enter your name");
+                String name = scanner.next();
+                System.out.println("Enter your password");
+                String pass = scanner.next();
+                Librarian li = new Librarian();
+                li.librarian(name, pass);}
+             else if (choice == 2) {
+                System.out.println("Do you want to create a new member? (yes/no)");
+                String create = scanner.next();
+                if (create.equalsIgnoreCase("no")) {
+                    System.out.println("Enter your name");
+                    String name = scanner.next();
+                    System.out.println("Enter your password");
+                    String pass = scanner.next();
+                    Member me = new Member(name, pass);
+                    if (Person.isValid(name, pass)) {
+                        System.out.println("You are a member");
+                    } else {
+                        System.out.println("You are not a member");
+                    }
+                }
+                else if (create.equalsIgnoreCase("yes")) {
+                    System.out.println("Enter your name");
+                    String name = scanner.next();
+                    System.out.println("Enter your password");
+                    String pass = scanner.next();
+                    Member me = new Member(name, pass);
+                    me.store();
+                    System.out.println("Member created successfully.");
+                }
+                else {
+                    System.out.println("Invalid choice, please try again.");
+                }
+            }
+            else {
+                System.out.println("Invalid choice, please try again.");
+            }
+        }
+    }
+}
